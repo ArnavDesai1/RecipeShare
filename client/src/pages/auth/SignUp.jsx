@@ -89,7 +89,7 @@ const SignUp = () => {
             label={"Email"}
             placeholder={"example@abc.com"}
             errorMessage={"Enter a valid email address!"}
-            pattern={/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/}
+            pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
           />
           <Input
             type={"password"}
@@ -105,7 +105,7 @@ const SignUp = () => {
             pattern={`^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,20}$`}
           />
           <Button
-            content={"Sign in"}
+            content={"Sign up"} // Corrected from "Sign in" to "Sign up"
             type={"submit"}
             customCss={"mt-3 rounded-lg"}
             loading={isLoading}
