@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { NoData, SingleCard } from "..";
 
-const index = ({ mainTitle, tagline, type, data }) => {
+const AllCards = ({ mainTitle, tagline, type, data }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredData, setFilteredData] = useState(data);
 
@@ -41,7 +41,7 @@ const index = ({ mainTitle, tagline, type, data }) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
             {filteredData?.map((singleData) => (
               <SingleCard
-                key={singleData._id}
+                key={type === "recipe" ? singleData.idMeal : singleData.url}
                 singleData={singleData}
                 type={type}
               />
@@ -55,4 +55,4 @@ const index = ({ mainTitle, tagline, type, data }) => {
   );
 };
 
-export default index;
+export default AllCards;

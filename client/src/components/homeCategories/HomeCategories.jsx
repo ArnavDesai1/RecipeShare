@@ -26,7 +26,7 @@ const HomeCategories = ({ title, data, isLoading }) => {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10">
               {data?.slice(0, 4).map((singleData) => (
                 <SingleCard
-                  key={singleData._id}
+                  key={singleData.idMeal || Math.random().toString(36).substr(2, 9)} // Use idMeal or a unique fallback
                   singleData={singleData}
                   type={title}
                 />

@@ -7,11 +7,11 @@ const verifyRoles = require("../middleware/verifyRoles");
 const router = express.Router();
 
 router
-  .route("/create-checkout-session")
+  .route("/subscribe")
   .post(
     [
       verifyJwt,
-      verifyRoles(ROLES_LIST.BasicUser, ROLES_LIST.Admin, ROLES_LIST.ProUser),
+      verifyRoles(ROLES_LIST.BasicUser),
     ],
     subscribe
   );

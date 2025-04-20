@@ -26,7 +26,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
     }),
     subscribeUser: builder.mutation({
       query: () => ({
-        url: `/stripe/create-checkout-session`,
+        url: "/api/stripe/subscribe", // Must be this
         method: "POST",
       }),
       invalidatesTags: ["users"],

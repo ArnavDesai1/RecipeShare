@@ -1,28 +1,87 @@
 const Recipe = require("../models/recipeModel");
 const User = require("../models/userModel");
 const jwt = require("jsonwebtoken");
+const axios = require('axios');
 
 const getAllRecipes = async (req, res, next) => {
   try {
-    const recipes = await Recipe.find()
-      .sort({ createdAt: -1 })
-      .populate("author", "name");
-    res.status(200).send(recipes);
+    const response = await axios.get('https://www.themealdb.com/api/json/v1/1/search.php?s=');
+    const apiRecipes = response.data.meals || [];
+    if (!apiRecipes.length) return res.status(200).json({ message: "No recipes found from API" });
+
+    const recipes = apiRecipes.map(recipe => ({
+      title: recipe.strMeal,
+      image: recipe.strMealThumb,
+      description: recipe.strInstructions,
+      calories: 0,
+      cookingTime: 30,
+      ingredients: [recipe.strIngredient1, recipe.strIngredient2, recipe.strIngredient3, recipe.strIngredient4, recipe.strIngredient5]
+        .filter(Boolean)
+        .map(ing => ing.trim()),
+      instructions: recipe.strInstructions.split('.').filter(step => step.trim().length > 0),
+      author: null,
+      createdAt: new Date(),
+      ratings: [],
+      idMeal: recipe.idMeal
+    }));
+
+    res.status(200).json(recipes);
   } catch (error) {
+    console.error('API fetch error:', error);
     next(error);
   }
 };
 
 const getRecipe = async (req, res, next) => {
   try {
-    const recipe = await Recipe.findOne({ _id: req.params.id })
-      .populate("author", "name")
-      .populate("comments.user", ["name", "profilePicture"]);
+    const recipeId = req.params.id;
+    const response = await axios.get(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${recipeId}`);
+    const apiRecipe = response.data.meals?.[0];
+    if (!apiRecipe) return res.status(404).json({ message: "Recipe not found" });
 
-    if (!recipe) return res.status(404).json({ message: "Recipe not found" });
+    const recipe = {
+      title: apiRecipe.strMeal,
+      image: apiRecipe.strMealThumb,
+      description: apiRecipe.strInstructions,
+      calories: 0,
+      cookingTime: 30,
+      ingredients: Object.keys(apiRecipe)
+        .filter(key => key.startsWith('strIngredient') && apiRecipe[key])
+        .map(key => apiRecipe[key].trim()),
+      instructions: apiRecipe.strInstructions.split('.').filter(step => step.trim().length > 0),
+      author: null,
+      createdAt: new Date(),
+      ratings: [],
+      idMeal: apiRecipe.idMeal
+    };
 
-    res.status(200).send(recipe);
+    res.status(200).json(recipe);
   } catch (error) {
+    console.error('API fetch error:', error);
+    next(error);
+  }
+};
+
+const getAllBlogs = async (req, res, next) => {
+  try {
+    const apiKey = process.env.NEWSAPI_KEY;
+    if (!apiKey) throw new Error("NewsAPI key not configured");
+
+    const response = await axios.get(`https://newsapi.org/v2/everything?q=cooking&apiKey=${apiKey}&pageSize=10`); // Broadened query and increased to 10
+    const apiBlogs = response.data.articles || [];
+
+    const blogs = apiBlogs.map(article => ({
+      title: article.title,
+      image: article.urlToImage || "https://via.placeholder.com/300x200",
+      description: article.description || "No description available",
+      author: article.author || "Unknown Author",
+      publishedAt: new Date(article.publishedAt),
+      url: article.url
+    }));
+
+    res.status(200).json(blogs);
+  } catch (error) {
+    console.error('Blog API fetch error:', error);
     next(error);
   }
 };
@@ -111,7 +170,6 @@ const rateRecipe = async (req, res, next) => {
       return res.status(404).json({ message: "Recipe not found." });
     }
 
-    // Check if the user has already rated this recipe
     const existingRating = recipe.ratings.find((rate) =>
       rate.user.equals(req.user)
     );
@@ -121,7 +179,6 @@ const rateRecipe = async (req, res, next) => {
         .json({ message: "User has already rated this recipe" });
     }
 
-    // Add the new rating
     recipe.ratings.push({ user: req.user, rating: rating });
     await recipe.save();
 
@@ -151,7 +208,6 @@ const addComment = async (req, res, next) => {
   try {
     const { comment } = req.body;
 
-    // Validate userId and commentText
     if (!comment) {
       return res.status(400).json({ message: "Comment is required." });
     }
@@ -161,7 +217,6 @@ const addComment = async (req, res, next) => {
       return res.status(404).json({ message: "Recipe not found." });
     }
 
-    // Add the new comment
     recipe.comments.push({ user: req.user, comment });
     await recipe.save();
 
@@ -206,10 +261,8 @@ const toggleFavoriteRecipe = async (req, res, next) => {
 
     const recipeIndex = user.favorites.indexOf(req.params.id);
     if (recipeIndex === -1) {
-      // Recipe not present, add it to favorites
       user.favorites.push(req.params.id);
     } else {
-      // Recipe already present, remove it from favorites
       user.favorites.splice(recipeIndex, 1);
     }
 
@@ -240,6 +293,7 @@ const toggleFavoriteRecipe = async (req, res, next) => {
 module.exports = {
   getAllRecipes,
   getRecipe,
+  getAllBlogs,
   addRecipe,
   updateRecipe,
   rateRecipe,

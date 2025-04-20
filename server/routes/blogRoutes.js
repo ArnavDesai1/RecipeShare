@@ -1,29 +1,26 @@
-const express = require("express");
-const {
-  getAllBlogs,
-  getBlog,
-  addBlog,
-  updateBlog,
-  deleteBlog,
-  addComment,
-  deleteComment,
-} = require("../controllers/blogController");
+const express = require('express');
+const { getAllBlogs } = require("../controllers/recipeController"); // Only import getAllBlogs
 const ROLES_LIST = require("../config/rolesList");
 const verifyJwt = require("../middleware/verifyJwt");
 const verifyRoles = require("../middleware/verifyRoles");
 
 const router = express.Router();
 
+// NewsAPI public endpoint
+router.route('/blogs').get(getAllBlogs); // Public access for NewsAPI blogs
+
+// Comment out or remove unused routes
+/*
 router
-  .route("/")
-  .get(getAllBlogs)
+  .route('/')
+  .get(getBlog)
   .post(
     [verifyJwt, verifyRoles(ROLES_LIST.Admin, ROLES_LIST.ProUser)],
     addBlog
   );
 
 router
-  .route("/:id")
+  .route('/:id')
   .get(getBlog)
   .put(
     [verifyJwt, verifyRoles(ROLES_LIST.Admin, ROLES_LIST.ProUser)],
@@ -53,4 +50,6 @@ router
     ],
     deleteComment
   );
+*/
+
 module.exports = router;

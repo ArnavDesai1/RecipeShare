@@ -3,11 +3,11 @@ import { apiSlice } from "../../redux/apiSlice";
 export const blogApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getBlog: builder.query({
-      query: (blogId) => `/blog/${blogId}`,
+      query: (blogId) => `/blog/${blogId}`, // This might not apply to NewsAPI; consider removing if unused
       providesTags: ["blogs"],
     }),
     getBlogs: builder.query({
-      query: () => "/blog",
+      query: () => "/blog/blogs", // Updated to /blog/blogs to match server route
       providesTags: ["blogs"],
     }),
     addBlog: builder.mutation({

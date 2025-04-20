@@ -13,6 +13,7 @@ const Blogs = () => {
   useEffect(() => {
     if (!isLoading) {
       dispatch(setBlogs(data));
+      console.log("Fetched blogs:", data); // Debug log
     }
   }, [isLoading]);
 

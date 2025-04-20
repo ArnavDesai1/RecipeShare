@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { BsArrowUpRight } from "react-icons/bs";
 import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import { Link, useNavigate } from "react-router-dom";
@@ -13,19 +13,23 @@ import useAuth from "../../hooks/useAuth";
 
 const SingleCard = ({ singleData, type }) => {
   const user = useAuth();
-
   const navigate = useNavigate();
-
   const dispatch = useDispatch();
   const [toggleFavorite] = useToggleFavoriteMutation();
+  const [showFullContent, setShowFullContent] = useState(false);
 
-  const formattedDate = dateFormat(singleData?.createdAt);
-  const sumOfRatings = singleData?.ratings.reduce(
+  const formattedDate = singleData?.createdAt
+    ? dateFormat(singleData.createdAt)
+    : singleData?.publishedAt
+    ? dateFormat(singleData.publishedAt)
+    : "N/A";
+  const sumOfRatings = (singleData?.ratings || []).reduce(
     (sum, item) => sum + item.rating,
     0
   );
-  const averageRating =
-    sumOfRatings === 0 ? 0 : sumOfRatings / singleData?.ratings.length;
+  const averageRating = singleData?.ratings?.length
+    ? sumOfRatings / singleData.ratings.length
+    : 0;
 
   const handleToggleFavorite = async () => {
     try {
@@ -34,7 +38,7 @@ const SingleCard = ({ singleData, type }) => {
         return navigate("/auth/signin");
       }
       const userData = await toast.promise(
-        toggleFavorite({ recipeId: singleData._id }).unwrap(),
+        toggleFavorite({ recipeId: singleData.idMeal }).unwrap(),
         {
           pending: "Please wait...",
           success: "Favorites updated",
@@ -48,16 +52,17 @@ const SingleCard = ({ singleData, type }) => {
     }
   };
 
+  const handleReadMore = () => {
+    setShowFullContent(true);
+  };
+
   return (
     <div className="flex flex-col gap-1 justify-between shadow hover:shadow-lg rounded">
-      {/* Card Top */}
-      <div className="flex flex-col justify-between h-full ">
+      <div className="flex flex-col justify-between h-full">
         <div className="relative h-full w-full">
-          {/* Only for singleData */}
-          {/* Favorite & share button */}
           {type === "recipe" && (
             <div className="absolute top-2 right-0 flex flex-col gap-2 p-2 bg-light rounded-l-lg z-10">
-              {user?.favorites?.some((ele) => ele === singleData._id) ? (
+              {user?.favorites?.some((ele) => ele === singleData.idMeal) ? (
                 <AiFillHeart
                   className="text-2xl text-red-500 cursor-pointer"
                   onClick={handleToggleFavorite}
@@ -69,50 +74,52 @@ const SingleCard = ({ singleData, type }) => {
                 />
               )}
               <ShareButton
-                url={`${import.meta.env.VITE_BASE_URL}/recipe/${
-                  singleData?._id
-                }`}
+                url={`${import.meta.env.VITE_BASE_URL}/recipe/${singleData.idMeal}`}
               />
             </div>
           )}
-          {/* Card image */}
           <img
             src={singleData?.image}
             alt={singleData?.title}
             className="w-full object-cover object-center rounded-t"
           />
-          {/* Overlay */}
           <div className="absolute bottom-0 left-0 w-full backdrop-blur-sm bg-[#fffcf5d3] p-4 flex justify-between">
-            <h4 className="font-bold">{singleData?.author?.name}</h4>
+            <h4 className="font-bold">
+              {singleData?.author?.name || singleData.author || "Unknown Author"}
+            </h4>
             <span className="text-sm">{formattedDate}</span>
           </div>
         </div>
-        {/* Card Bottom details */}
         <div className="flex flex-col gap-3 p-4">
-          {/* Card heading */}
           <h4 className="font-bold text-lg">{singleData?.title}</h4>
-          {/* Card description */}
           <p className="text-sm">
             {singleData?.description.substring(0, 100)}...
           </p>
-          {/* Card rating */}
           {type === "recipe" && (
-            <Rating
-              value={averageRating}
-              readOnly
-              size={"medium"}
-            />
+            <Rating value={averageRating} readOnly size={"medium"} />
           )}
         </div>
       </div>
-      {/* Read more link */}
-      <Link
-        to={`/${type}/${singleData?._id}`}
+      {showFullContent && type === "blog" && (
+        <div className="p-4 bg-gray-100 rounded-b">
+          <h4 className="font-bold">Full Article</h4>
+          <p className="text-sm">{singleData.description}</p>
+          <p className="text-xs text-gray-500">Source: <a href={singleData.url} target="_blank" rel="noopener noreferrer">{singleData.url}</a></p>
+          <button
+            onClick={() => setShowFullContent(false)}
+            className="mt-2 text-blue-500 underline"
+          >
+            Close
+          </button>
+        </div>
+      )}
+      <button
+        onClick={handleReadMore}
         className="flex gap-2 items-center p-4 mt-4 max-w-max hover:border-primary hover:text-primary"
       >
-        Read more
+        Read More
         <BsArrowUpRight />
-      </Link>
+      </button>
     </div>
   );
 };
