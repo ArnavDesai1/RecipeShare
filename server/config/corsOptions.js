@@ -9,6 +9,7 @@ const corsOptions = {
     }
   },
   optionsSuccessStatus: 200,
+  credentials: true, // Matches fetchBaseQuery credentials: "include"
 };
 
 module.exports = corsOptions;
