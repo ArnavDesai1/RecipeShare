@@ -1,44 +1,36 @@
 const mongoose = require("mongoose");
 
-const schema = mongoose.Schema(
+const blogSchema = mongoose.Schema(
   {
     title: {
       type: String,
+      required: true,
     },
     author: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      type: String, // String for NewsAPI author, can be "Unknown" if missing
+      default: "Unknown Author",
     },
     description: {
       type: String,
+      required: true,
     },
-    image: { type: String },
-    ratings: [
-      {
-        user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-        rating: { type: Number },
-      },
-    ],
-    comments: [
-      {
-        user: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
-        },
-        comment: {
-          type: String,
-        },
-        date: {
-          type: Date,
-          default: Date.now(),
-        },
-      },
-    ],
+    image: {
+      type: String,
+      required: true,
+    },
+    publishedAt: {
+      type: Date,
+      required: true,
+    },
+    url: {
+      type: String,
+      required: true,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-const Blog = mongoose.model("Blog", schema);
+const Blog = mongoose.model("Blog", blogSchema);
 module.exports = Blog;
