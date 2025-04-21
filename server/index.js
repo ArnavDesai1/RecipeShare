@@ -13,12 +13,10 @@ const port = process.env.PORT || 5000;
 
 // CORS middleware
 app.use(credentials);
-app.use(cors(corsOptions));
+app.use(cors(corsOptions)); // Ensure this is before other middleware
 
 app.use(express.urlencoded({ extended: false }));
-
 app.use(cookieParser());
-
 app.use(express.json());
 
 // Route middleware
