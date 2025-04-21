@@ -5,10 +5,17 @@ export const recipeApiSlice = apiSlice.injectEndpoints({
     getRecipe: builder.query({
       query: (recipeId) => `/recipe/${recipeId}`,
       providesTags: ["recipes"],
+      transformResponse: (response) => response.message ? { message: response.message } : response,
     }),
     getRecipes: builder.query({
       query: () => "/recipe",
       providesTags: ["recipes"],
+      transformResponse: (response) => response.message ? { message: response.message } : response,
+    }),
+    getBlogs: builder.query({
+      query: () => "/blog/blogs", // Adjusted to match a potential blogs route (update if different)
+      providesTags: ["blogs"],
+      transformResponse: (response) => response.message ? { message: response.message } : response,
     }),
     addRecipe: builder.mutation({
       query: (recipeData) => ({
@@ -69,12 +76,10 @@ export const recipeApiSlice = apiSlice.injectEndpoints({
       invalidatesTags: ["recipes"],
     }),
     toggleFavorite: builder.mutation({
-      query: ({ recipeId }) => {
-        return {
-          url: `/recipe/favorite/${recipeId}`,
-          method: "PUT",
-        };
-      },
+      query: ({ recipeId }) => ({
+        url: `/recipe/favorite/${recipeId}`,
+        method: "PUT",
+      }),
       invalidatesTags: ["recipes"],
     }),
   }),
@@ -83,6 +88,7 @@ export const recipeApiSlice = apiSlice.injectEndpoints({
 export const {
   useGetRecipeQuery,
   useGetRecipesQuery,
+  useGetBlogsQuery,
   useAddRecipeMutation,
   useUpdateRecipeMutation,
   useRateRecipeMutation,

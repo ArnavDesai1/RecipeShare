@@ -11,7 +11,7 @@ const connectDB = require("./db/conn");
 const app = express();
 const port = process.env.PORT || 5000;
 
-// cors middleware
+// CORS middleware
 app.use(credentials);
 app.use(cors(corsOptions));
 
@@ -21,7 +21,7 @@ app.use(cookieParser());
 
 app.use(express.json());
 
-// route middleware
+// Route middleware
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/user", require("./routes/userRoutes"));
 app.use("/api/recipe", require("./routes/recipeRoutes"));
@@ -36,5 +36,5 @@ connectDB()
     app.listen(port, () => console.log(`Server running on port ${port}`));
   })
   .catch((err) => {
-    console.error(`Error connecting to MongoDB ${err}`);
+    console.error(`Error connecting to MongoDB: ${err.message}`);
   });

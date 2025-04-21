@@ -9,7 +9,7 @@ const {
   addComment,
   deleteComment,
   toggleFavoriteRecipe,
-  getAllBlogs, // Add this to the destructuring
+  getAllBlogs,
 } = require("../controllers/recipeController");
 const ROLES_LIST = require("../config/rolesList");
 const verifyJwt = require("../middleware/verifyJwt");
@@ -19,7 +19,7 @@ const router = express.Router();
 
 router
   .route("/")
-  .get(getAllRecipes) // Removed [verifyJwt, verifyRoles(...)] for public access
+  .get(getAllRecipes) // Public access
   .post(
     [verifyJwt, verifyRoles(ROLES_LIST.Admin, ROLES_LIST.ProUser)],
     addRecipe
@@ -78,7 +78,7 @@ router
   );
 
 router
-  .route("/blogs") // New route for blogs
-  .get(getAllBlogs); // Public access, no authentication needed
+  .route("/blogs")
+  .get(getAllBlogs); // Public access
 
 module.exports = router;

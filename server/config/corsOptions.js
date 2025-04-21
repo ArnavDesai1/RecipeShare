@@ -1,15 +1,21 @@
-const allowedOrigins = require("./allowedOrigins");
+const allowedOrigins = [
+  process.env.CLIENT_BASE_URL || 'https://recipe-share-six.vercel.app',
+  'http://localhost:5173' // For local testing
+];
 
 const corsOptions = {
   origin: (origin, callback) => {
-    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+    if (allowedOrigins.includes(origin) || !origin) {
       callback(null, true);
     } else {
-      callback(new Error("Not allowed by CORS"));
+      console.warn(`CORS blocked origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
     }
   },
+  credentials: true,
   optionsSuccessStatus: 200,
-  credentials: true, // Matches fetchBaseQuery credentials: "include"
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 };
 
 module.exports = corsOptions;
