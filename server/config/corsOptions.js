@@ -1,5 +1,6 @@
 const allowedOrigins = [
   process.env.CLIENT_BASE_URL || 'https://recipe-share-six.vercel.app',
+  "https://recipe-share-o8zhc2vjz-elementals-projects-4c2b4ce4.vercel.app/",
   'http://localhost:5173' // For local testing
 ];
 
