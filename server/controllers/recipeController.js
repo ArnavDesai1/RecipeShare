@@ -1,36 +1,44 @@
 const Recipe = require("../models/recipeModel");
 const User = require("../models/userModel");
 const jwt = require("jsonwebtoken");
-const axios = require('axios');
+const axios = require("axios");
 
 const getAllRecipes = async (req, res, next) => {
   try {
-    const response = await axios.get('https://www.themealdb.com/api/json/v1/1/search.php?s=');
+    const response = await axios.get("https://www.themealdb.com/api/json/v1/1/search.php?s=");
     const apiRecipes = response.data.meals || [];
     if (!apiRecipes.length) {
-      console.warn('No recipes from MealDB');
+      console.warn("No recipes from MealDB");
       return res.status(200).json({ message: "No recipes found from API" });
     }
 
-    const recipes = apiRecipes.map(recipe => ({
+    const recipes = apiRecipes.map((recipe) => ({
       title: recipe.strMeal || "Unnamed Recipe",
       image: recipe.strMealThumb || "https://via.placeholder.com/300x200",
       description: recipe.strInstructions || "No instructions available",
       calories: 0,
       cookingTime: 30,
-      ingredients: [recipe.strIngredient1, recipe.strIngredient2, recipe.strIngredient3, recipe.strIngredient4, recipe.strIngredient5]
+      ingredients: [
+        recipe.strIngredient1,
+        recipe.strIngredient2,
+        recipe.strIngredient3,
+        recipe.strIngredient4,
+        recipe.strIngredient5,
+      ]
         .filter(Boolean)
-        .map(ing => ing.trim()),
-      instructions: recipe.strInstructions ? recipe.strInstructions.split('.').filter(step => step.trim().length > 0) : [],
+        .map((ing) => ing.trim()),
+      instructions: recipe.strInstructions
+        ? recipe.strInstructions.split(".").filter((step) => step.trim().length > 0)
+        : [],
       author: null,
       createdAt: new Date(),
       ratings: [],
-      idMeal: recipe.idMeal
+      idMeal: recipe.idMeal,
     }));
 
     res.status(200).json(recipes);
   } catch (error) {
-    console.error('API fetch error for recipes:', error.message);
+    console.error("API fetch error for recipes:", error.message);
     next(error);
   }
 };
@@ -38,9 +46,19 @@ const getAllRecipes = async (req, res, next) => {
 const getRecipe = async (req, res, next) => {
   try {
     const recipeId = req.params.id;
-    const response = await axios.get(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${recipeId}`);
+    if (!recipeId || isNaN(parseInt(recipeId))) {
+      return res.status(400).json({ message: "Invalid recipe ID" });
+    }
+
+    const response = await axios.get(
+      `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${recipeId}`
+    );
     const apiRecipe = response.data.meals?.[0];
-    if (!apiRecipe) return res.status(404).json({ message: "Recipe not found" });
+    if (!apiRecipe) {
+      return res
+        .status(404)
+        .json({ message: `Recipe with ID ${recipeId} not found in MealDB` });
+    }
 
     const recipe = {
       title: apiRecipe.strMeal || "Unnamed Recipe",
@@ -49,18 +67,20 @@ const getRecipe = async (req, res, next) => {
       calories: 0,
       cookingTime: 30,
       ingredients: Object.keys(apiRecipe)
-        .filter(key => key.startsWith('strIngredient') && apiRecipe[key])
-        .map(key => apiRecipe[key].trim()),
-      instructions: apiRecipe.strInstructions ? apiRecipe.strInstructions.split('.').filter(step => step.trim().length > 0) : [],
+        .filter((key) => key.startsWith("strIngredient") && apiRecipe[key])
+        .map((key) => apiRecipe[key].trim()),
+      instructions: apiRecipe.strInstructions
+        ? apiRecipe.strInstructions.split(".").filter((step) => step.trim().length > 0)
+        : [],
       author: null,
       createdAt: new Date(),
       ratings: [],
-      idMeal: apiRecipe.idMeal
+      idMeal: apiRecipe.idMeal,
     };
 
     res.status(200).json(recipe);
   } catch (error) {
-    console.error('API fetch error for recipe:', error.message);
+    console.error("API fetch error for recipe:", error.message);
     next(error);
   }
 };
@@ -70,32 +90,33 @@ const getAllBlogs = async (req, res, next) => {
     const apiKey = process.env.NEWSAPI_KEY;
     if (!apiKey) throw new Error("NewsAPI key not configured");
 
-    const response = await axios.get('https://newsapi.org/v2/everything', {
+    const response = await axios.get("https://newsapi.org/v2/everything", {
       params: {
-        q: 'cooking',
+        q: "food OR cooking OR recipe -politics -sports", // Refined query to exclude non-food topics
         apiKey,
-        pageSize: 10,
-        language: 'en' // Optional: Ensure English results
-      }
+        pageSize: 20, // Increased from 10 to 20 for more results
+        language: "en",
+        sortBy: "relevance", // Sort by relevance to prioritize food-related articles
+      },
     });
     const apiBlogs = response.data.articles || [];
     if (!apiBlogs.length) {
-      console.warn('No blogs from NewsAPI');
+      console.warn("No blogs from NewsAPI");
       return res.status(200).json({ message: "No blogs found from API" });
     }
 
-    const blogs = apiBlogs.map(article => ({
+    const blogs = apiBlogs.map((article) => ({
       title: article.title || "No Title",
       image: article.urlToImage || "https://via.placeholder.com/300x200",
       description: article.description || "No description available",
       author: article.author || "Unknown Author",
       publishedAt: new Date(article.publishedAt) || new Date(),
-      url: article.url || "#"
+      url: article.url || "#",
     }));
 
     res.status(200).json(blogs);
   } catch (error) {
-    console.error('Blog API fetch error:', error.message);
+    console.error("Blog API fetch error:", error.message);
     next(error);
   }
 };
