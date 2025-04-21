@@ -13,7 +13,7 @@ export const recipeApiSlice = apiSlice.injectEndpoints({
       transformResponse: (response) => response.message ? { message: response.message } : response,
     }),
     getBlogs: builder.query({
-      query: () => "/blog/blogs", // Adjusted to match a potential blogs route (update if different)
+      query: () => "/api/blog/blogs", // Updated to match backend route
       providesTags: ["blogs"],
       transformResponse: (response) => response.message ? { message: response.message } : response,
     }),

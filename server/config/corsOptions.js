@@ -5,6 +5,7 @@ const allowedOrigins = [
 
 const corsOptions = {
   origin: (origin, callback) => {
+    console.log(`Checking CORS origin: ${origin}`); // Debug log
     if (allowedOrigins.includes(origin) || !origin) {
       callback(null, true);
     } else {
@@ -15,7 +16,8 @@ const corsOptions = {
   credentials: true,
   optionsSuccessStatus: 200,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Authorization'] // If returning tokens
 };
 
 module.exports = corsOptions;
