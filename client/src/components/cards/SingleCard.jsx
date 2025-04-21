@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { BsArrowUpRight } from "react-icons/bs";
 import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import { Link, useNavigate } from "react-router-dom";
@@ -53,7 +53,11 @@ const SingleCard = ({ singleData, type }) => {
   };
 
   const handleReadMore = () => {
-    setShowFullContent(true);
+    if (type === "recipe") {
+      navigate(`/recipe/${singleData.idMeal}`); // Navigate to recipe detail page
+    } else if (type === "blog") {
+      setShowFullContent(true); // Toggle full content for blogs
+    }
   };
 
   return (
@@ -84,9 +88,7 @@ const SingleCard = ({ singleData, type }) => {
             className="w-full object-cover object-center rounded-t"
           />
           <div className="absolute bottom-0 left-0 w-full backdrop-blur-sm bg-[#fffcf5d3] p-4 flex justify-between">
-            <h4 className="font-bold">
-              {singleData?.author?.name || singleData.author || "Unknown Author"}
-            </h4>
+            <h4 className="font-bold">{singleData.author || "Unknown Author"}</h4>
             <span className="text-sm">{formattedDate}</span>
           </div>
         </div>
@@ -104,7 +106,9 @@ const SingleCard = ({ singleData, type }) => {
         <div className="p-4 bg-gray-100 rounded-b">
           <h4 className="font-bold">Full Article</h4>
           <p className="text-sm">{singleData.description}</p>
-          <p className="text-xs text-gray-500">Source: <a href={singleData.url} target="_blank" rel="noopener noreferrer">{singleData.url}</a></p>
+          <p className="text-xs text-gray-500">
+            Source: <a href={singleData.url} target="_blank" rel="noopener noreferrer">{singleData.url}</a>
+          </p>
           <button
             onClick={() => setShowFullContent(false)}
             className="mt-2 text-blue-500 underline"
